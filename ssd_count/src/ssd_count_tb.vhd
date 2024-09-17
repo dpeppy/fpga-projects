@@ -8,36 +8,33 @@ use ssd_count_tb.ssd_count_tb_pack.all;
 
 architecture behav of tb is
 
-  -- Constants
-  constant C_CLOCK_FREQ_HZ  : NATURAL := 125*1e6;  -- 125 MHz
-  constant C_STABLE_TIME_MS : NATURAL := 1;        -- 1 ms
+  constant C_PULSE_CLOCKS : natural := C_CLK_FREQ_MHZ*2*C_DEB_TIME_MS*(1e6/1000);
 
   -- Clock/Reset Signals
   signal clock_125 : BIT;
   signal reset     : BIT;
 
   -- DUT Signals
-  signal button   : BIT;
-  signal ssd_seg0 : BIT_VECTOR(0 to 6);
-  signal ssd_seg1 : BIT_VECTOR(0 to 6);  
-  signal ssd_sel  : BIT;
+  signal button  : BIT;
+  signal ssd_seg : BIT_VECTOR(0 to 6);
+  signal ssd_sel : BIT;
 
-  -- Component Declaration
+  -- Component Declaratione
   component ssd_count_top is
     generic (
-      CLOCK_FREQ_HZ  : NATURAL := 125e6;
-      STABLE_TIME_MS : NATURAL := 8
+      CLK_FREQ_MHZ  : NATURAL := 125;
+      DEB_TIME_MS   : NATURAL := 8;
+      SSD_COM_ANODE : BOOLEAN := TRUE
       );
     port (
       -- Clock/Reset Interface
-      clock    : in  BIT;
-      reset    : in  BIT;
+      clock   : in  BIT;
+      reset   : in  BIT;
       -- Button Input
-      button   : in  BIT;
+      button  : in  BIT;
       -- Seven Segment Interface
-      ssd_seg0 : out BIT_VECTOR(0 to 6);
-      ssd_seg1 : out BIT_VECTOR(0 to 6);
-      ssd_sel  : out BIT
+      ssd_seg : out BIT_VECTOR(0 to 6);
+      ssd_sel : out BIT
       );
   end component;
 
@@ -49,9 +46,15 @@ begin
     -- DUT reset
     gen_reset(10, true, clock_125, reset);
 
-    -- Simulate button presses
-    for i in 0 to 15 loop
-      gen_pulse(C_CLOCK_FREQ_HZ*2*C_STABLE_TIME_MS/1000, true, C_CLOCK_FREQ_HZ*2*C_STABLE_TIME_MS/1000, false, clock_125, button);
+    for i in 0 to 31 loop
+      -- Simulate button presses
+      gen_pulse(C_PULSE_CLOCKS, true, C_PULSE_CLOCKS, false, clock_125, button);
+      -- Check segment values
+      if (ssd_sel = '0') then
+        chk_seg((i+1) mod 16, ssd_seg, clock_125);
+      else
+        chk_seg((i+1)/16, ssd_seg, clock_125);
+      end if;
     end loop;
 
     -- Stop test
@@ -65,19 +68,19 @@ begin
   -- Design Under Test
   DUT : ssd_count_top
     generic map (
-      CLOCK_FREQ_HZ  => C_CLOCK_FREQ_HZ,
-      STABLE_TIME_MS => C_STABLE_TIME_MS
+      CLK_FREQ_MHZ  => C_CLK_FREQ_MHZ,
+      DEB_TIME_MS   => C_DEB_TIME_MS,
+      SSD_COM_ANODE => C_SSD_COM_ANODE
       )
     port map (
       -- Clock/Reset Interface
-      clock    => clock_125,
-      reset    => reset,
+      clock   => clock_125,
+      reset   => reset,
       -- Button Input
-      button   => button,
+      button  => button,
       -- Seven Segment Interface
-      ssd_seg0 => ssd_seg0,
-      ssd_seg1 => ssd_Seg1,
-      ssd_sel  => ssd_sel
+      ssd_seg => ssd_seg,
+      ssd_sel => ssd_sel
       );
 
 end architecture behav;
