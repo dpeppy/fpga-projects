@@ -1,32 +1,37 @@
 entity ssd_count_top is
   generic (
-    CLOCK_FREQ_HZ  : NATURAL := 125*1e6; -- Clock frequency
-    STABLE_TIME_MS : NATURAL := 10       -- Debounce stable time
+    CLK_FREQ_MHZ  : NATURAL := 125;  -- Clock frequency
+    DEB_TIME_MS   : NATURAL := 10;   -- Debounce stable time
+    SSD_COM_ANODE : BOOLEAN := TRUE  -- SSD type (true = common anode, false = common cathode)
     );
   port (
     -- Clock/Reset Interface
-    clock    : in  BIT;
-    reset    : in  BIT;
+    clock   : in  BIT;
+    reset   : in  BIT;
     -- Button Input
-    button   : in  BIT;
+    button  : in  BIT;
     -- Seven Segment Interface
-    ssd_seg0 : out BIT_VECTOR(0 to 6);
-    ssd_seg1 : out BIT_VECTOR(0 to 6);
-    ssd_sel  : out BIT
+    ssd_seg : out BIT_VECTOR(0 to 6);
+    ssd_sel : out BIT
     );
 end entity;
 
+library ssd_count;
+use ssd_count.ssd_count_pack.all;
+
 architecture one_seg of ssd_count_top is
 
-  signal input_reg : bit_vector(0 to 5);
+  constant DEB_COUNT_MAX : NATURAL := CLK_FREQ_MHZ*DEB_TIME_MS*(1e6/1000);
+  constant SSD_COUNT_MAX : NATURAL := 15;
 
-  signal deb_count : NATURAL range 0 to CLOCK_FREQ_HZ*STABLE_TIME_MS/1000;
-  signal ssd_count : NATURAL range 0 to 15;
+  signal deb_count : NATURAL range 0 to DEB_COUNT_MAX;
+  signal ssd_count : NATURAL range 0 to SSD_COUNT_MAX;
+
+  signal input_reg : BIT_VECTOR(0 to 5);
 
 begin
 
-  -- Segment defaults
-  ssd_seg1 <= (others => '0');
+  -- SSD defaults
   ssd_sel  <= '0';
 
   SEVEN_SEG_COUNT : process (clock, reset) is
@@ -34,11 +39,11 @@ begin
 
     if (reset = '1') then
 
-      input_reg <= (others => '0');
-      ssd_seg0  <= (others => '0');
-
       deb_count <= 0;
       ssd_count <= 0;
+
+      input_reg <= (others => '0');
+      ssd_seg   <= (others => '0');
 
     elsif (clock'event and clock = '1') then
 
@@ -48,7 +53,7 @@ begin
       -- Debounce logic
       if (input_reg(2) /= input_reg(3)) then
         deb_count <= 0;
-      elsif (deb_count < CLOCK_FREQ_HZ*STABLE_TIME_MS/1000) then
+      elsif (deb_count < DEB_COUNT_MAX) then
         deb_count <= deb_count + 1;
       else
         input_reg(4 to 5) <= input_reg(3 to 4);
@@ -56,7 +61,7 @@ begin
 
       -- SSD counter logic
       if (input_reg(4) = '1' and input_reg(5) = '0') then
-        if (ssd_count < 15) then
+        if (ssd_count < SSD_COUNT_MAX) then
           ssd_count <= ssd_count + 1;
         else
           ssd_count <= 0;
@@ -64,24 +69,7 @@ begin
       end if;
 
       -- SSD decoder
-      case ssd_count is
-        when 0  => ssd_seg0 <= "1111110";
-        when 1  => ssd_seg0 <= "0110000";
-        when 2  => ssd_seg0 <= "1101101";
-        when 3  => ssd_seg0 <= "1111001";
-        when 4  => ssd_seg0 <= "0110011";
-        when 5  => ssd_seg0 <= "1011011";
-        when 6  => ssd_seg0 <= "0011111";
-        when 7  => ssd_seg0 <= "1110000";
-        when 8  => ssd_seg0 <= "1111111";
-        when 9  => ssd_seg0 <= "1110011";
-        when 10 => ssd_seg0 <= "1110111";
-        when 11 => ssd_seg0 <= "0011111";
-        when 12 => ssd_seg0 <= "1001110";
-        when 13 => ssd_seg0 <= "0111101";
-        when 14 => ssd_seg0 <= "1001111";
-        when 15 => ssd_seg0 <= "1000111";
-      end case;
+      ssd_seg <= to_seg(SSD_COM_ANODE, ssd_count);
 
     end if;
 
