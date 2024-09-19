@@ -14,7 +14,7 @@ This repository contains the HDL code for the FPGA projects presented.
 
 ## License
 
-Distributed under the MIT License. See `LICENSE.txt` for more information.
+Distributed under the CERN-OHL-P v2 License. See `LICENSE.txt` for more information.
 
 ## Contact
 
