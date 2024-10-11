@@ -19,7 +19,7 @@ architecture behav of tb is
   signal ssd_seg : BIT_VECTOR(0 to 6);
   signal ssd_sel : BIT;
 
-  -- Component Declaratione
+  -- Component Declaration
   component ssd_count_top is
     generic (
       CLK_FREQ_MHZ  : NATURAL := 125;
