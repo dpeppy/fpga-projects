@@ -19,25 +19,6 @@ architecture behav of tb is
   signal ssd_seg : BIT_VECTOR(0 to 6);
   signal ssd_sel : BIT;
 
-  -- Component Declaration
-  component ssd_count_top is
-    generic (
-      CLK_FREQ_MHZ  : NATURAL := 125;
-      DEB_TIME_MS   : NATURAL := 8;
-      SSD_COM_ANODE : BOOLEAN := TRUE
-      );
-    port (
-      -- Clock/Reset Interface
-      clock   : in  BIT;
-      reset   : in  BIT;
-      -- Button Input
-      button  : in  BIT;
-      -- Seven Segment Interface
-      ssd_seg : out BIT_VECTOR(0 to 6);
-      ssd_sel : out BIT
-      );
-  end component;
-
 begin
 
   TEST : process is
@@ -66,7 +47,7 @@ begin
   gen_clock(8 ns, true, clock_125);
 
   -- Design Under Test
-  DUT : ssd_count_top
+  DUT : entity ssd_count.ssd_count_top
     generic map (
       CLK_FREQ_MHZ  => C_CLK_FREQ_MHZ,
       DEB_TIME_MS   => C_DEB_TIME_MS,
