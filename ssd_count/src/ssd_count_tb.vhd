@@ -47,7 +47,7 @@ begin
   gen_clock(8 ns, true, clock_125);
 
   -- Design Under Test
-  DUT : entity ssd_count.ssd_count_top
+  DUT : entity ssd_count.ssd_count_top(one_seg)
     generic map (
       CLK_FREQ_MHZ  => C_CLK_FREQ_MHZ,
       DEB_TIME_MS   => C_DEB_TIME_MS,
