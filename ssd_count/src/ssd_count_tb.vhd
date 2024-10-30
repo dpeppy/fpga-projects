@@ -2,6 +2,7 @@ entity tb is
 end entity tb;
 
 library ssd_count;
+use ssd_count.ssd_count_pack.all;
 
 library ssd_count_tb;
 use ssd_count_tb.ssd_count_tb_pack.all;
