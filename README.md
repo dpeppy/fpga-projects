@@ -5,7 +5,7 @@ This repository contains the HDL code for the FPGA projects that can be implemen
 * ssd_count - Button debounce & counter driving an seven segment display
 
 ## PYNQ-Z2 Resources
-![TUL PYNQ-Z2](https://www.amd.com/content/dam/amd/en/images/products/boards/2410750-zynq-xc7z020-board-product.jpg)
+![TUL PYNQ-Z2](assets/pynq-z2.png)
 
 * <a href="https://dpoauwgwqsy2x.cloudfront.net/Download/pynqz2_user_manual_v1_0.pdf">PYNQ-Z2 - User Manual</a>
 * <a href="https://dpoauwgwqsy2x.cloudfront.net/Download/TUL_PYNQ_Schematic_R12.pdf">PYNQ-Z2 - Schematics</a>
